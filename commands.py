@@ -3,6 +3,8 @@ from discord.ext import commands
 import os
 import random
 from dotenv import load_dotenv
+import typing
+import requests
 
 load_dotenv()
 intents = discord.Intents.all()
@@ -25,11 +27,36 @@ bot_commands = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot_commands))
 
-
 @bot_commands.command("ping")
 async def ping(ctx):
-  await ctx.send('Pong!')
+    await ctx.send('Pong!')
 
+@bot_commands.command("validate")
+async def validate(ctx, *, arg):
+    await ctx.send('Validating model...')
+@validate.error
+async def validate_error(ctx, error):
+    await ctx.send('I could not find that model...')
+
+@bot_commands.command("generate")
+async def generate(ctx, *, arg):
+    await ctx.send('Generating model...')
+
+@generate.error
+async def generate_error(ctx, error):
+    # if isinstance(error, commands.BadArgument):
+    await ctx.send('I could not find that model...')
+
+@bot_commands.command("push")
+async def push(ctx):
+    await ctx.send('Pushing model...')
+
+@bot_commands.command("train")
+async def train(ctx):
+    await ctx.send('Training model...')
+@bot_commands.command("train_merged")
+async def train_merged(ctx):
+    await ctx.send('Training all models...')
 
 if __name__ == "__main__":
     bot_commands.run(token)
