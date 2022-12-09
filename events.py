@@ -49,8 +49,7 @@ async def on_message(message):
     try:
         response = requests.post(url, data = data)
         if response.ok:
-            data = json.loads(response.text)
-            print(data)
+            data = response.json()
             for item in data:
                 msg = item['text']
                 print(f"Rasa response --> {msg}")
