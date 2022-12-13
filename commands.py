@@ -5,6 +5,7 @@ import random
 from dotenv import load_dotenv
 import typing
 import requests
+import base64
 
 load_dotenv()
 intents = discord.Intents.all()
@@ -34,6 +35,13 @@ async def ping(ctx):
 @bot_commands.command("validate")
 async def validate(ctx, *, arg):
     await ctx.send('Validating model...')
+    data = arg.encode()
+    url = f"{dflow_domain_url}{dflow_validate_path}"
+    try:
+        response = requests.post(url, data = data)
+    except:
+        raise Exception('Validation problem')
+
 @validate.error
 async def validate_error(ctx, error):
     print('Error:', error)
