@@ -11,8 +11,6 @@ intents = discord.Intents.all()
 intents.message_content = True
 
 token = os.getenv('DFLOW_BOT_TOKEN')
-
-token = os.getenv('DFLOW_BOT_TOKEN')
 rasa_domain_url = os.getenv('RASA_DOMAIN_URL')
 rasa_train_model_path = os.getenv('RASA_TRAIN_MODEL_PATH')
 rasa_chat_path = os.getenv('RASA_CHAT_PATH')
@@ -42,8 +40,8 @@ async def on_message(message):
         await message.channel.send('Please say something...')
         return
 
-    username = str(message.author)
     data = '{"sender": "' + username + '", "message": "' +  str(message.content) + '"}'
+    username = str(message.author).replace("#",'')
     data = data.encode('utf-8')
     url = f"{rasa_domain_url}{rasa_chat_path}"
     try:
@@ -51,7 +49,10 @@ async def on_message(message):
         if response.ok:
             data = response.json()
             for item in data:
-                msg = item['text']
+                if 'text' in item:
+                    msg = item['text']
+                elif 'custom' in item:
+                    msg = item['custom']
                 print(f"Rasa response --> {msg}")
                 await message.channel.send(msg)
         else:
