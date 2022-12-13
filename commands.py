@@ -36,7 +36,11 @@ async def validate(ctx, *, arg):
     await ctx.send('Validating model...')
 @validate.error
 async def validate_error(ctx, error):
-    await ctx.send('I could not find that model...')
+    print('Error:', error)
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please provide a model...')
+    else:
+        await ctx.send(error)
 
 @bot_commands.command("generate")
 async def generate(ctx, *, arg):
@@ -44,8 +48,11 @@ async def generate(ctx, *, arg):
 
 @generate.error
 async def generate_error(ctx, error):
-    # if isinstance(error, commands.BadArgument):
-    await ctx.send('I could not find that model...')
+    print('Error:', error)
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please provide a model...')
+    else:
+        await ctx.send(error)
 
 @bot_commands.command("push")
 async def push(ctx):
