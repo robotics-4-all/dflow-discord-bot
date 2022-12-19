@@ -18,6 +18,8 @@ rasa_token = os.getenv('RASA_TOKEN')
 dflow_domain_url = os.getenv('DFLOW_DOMAIN_URL')
 dflow_validate_path = os.getenv('DFLOW_VALIDATE_PATH')
 dflow_generate_path = os.getenv('DFLOW_GENERATE_PATH')
+dflow_push_model_path = os.getenv('DFLOW_PUSH_MODEL_PATH')
+dflow_merge_n_train_path = os.getenv('DFLOW_MERGE_N_TRAIN_PATH')
 rasa_chat_path = os.getenv('RASA_CHAT_PATH')
 
 
