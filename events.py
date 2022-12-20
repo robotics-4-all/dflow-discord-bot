@@ -33,6 +33,9 @@ async def on_message(message):
     if message.author == bot_dialogue.user:
         return
 
+    if message.content.startswith('!'):
+        return
+    
     if message.content.startswith('hi'):
         await message.channel.send('Hello!')
 
