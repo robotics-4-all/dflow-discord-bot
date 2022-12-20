@@ -16,6 +16,7 @@ rasa_domain_url = os.getenv('RASA_DOMAIN_URL')
 rasa_train_model_path = os.getenv('RASA_TRAIN_MODEL_PATH')
 rasa_token = os.getenv('RASA_TOKEN')
 dflow_domain_url = os.getenv('DFLOW_DOMAIN_URL')
+dflow_login_path = os.getenv('DFLOW_LOGIN_PATH')
 dflow_validate_path = os.getenv('DFLOW_VALIDATE_PATH')
 dflow_generate_path = os.getenv('DFLOW_GENERATE_PATH')
 dflow_push_model_path = os.getenv('DFLOW_PUSH_MODEL_PATH')
@@ -37,10 +38,28 @@ async def ping(ctx):
 @bot_commands.command("validate")
 async def validate(ctx, *, arg):
     await ctx.send('Validating model...')
+    url = f"{dflow_domain_url}{dflow_login_path}"
+    username = str(ctx.message.author).replace("#",'')
+    data = {
+        'username': username,
+        'password': '123123'
+    }
+    try:
+        response = requests.post(url, data = data)
+        print(f"--> Login response: {response}")
+        if response.status_code == 401:
+            raise Exception
+        token = response.json()['access_token']
+        headers = {'Authorization' : f'Bearer {token}'}
+    except:
+        raise Exception('Login to dflow-api failed')
+
     data = arg.encode()
     url = f"{dflow_domain_url}{dflow_validate_path}"
     try:
-        response = requests.post(url, data = data)
+        response = requests.post(url, headers = headers, data = data)
+        print(f"--> Validaton response: {response}")
+        print(response.text)
     except:
         raise Exception('Validation problem')
 
