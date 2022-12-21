@@ -12,15 +12,11 @@ load_dotenv()
 intents = discord.Intents.all()
 intents.message_content = True
 
-TOKEN = os.getenv('DFLOW_BOT_TOKEN')
+BOT_TOKEN = os.getenv('DFLOW_BOT_TOKEN')
 RASA_DOMAIN_URL = os.getenv('RASA_DOMAIN_URL')
-rasa_train_model_path = os.getenv('RASA_TRAIN_MODEL_PATH')
+RASA_TRAIN_MODEL_PATH = os.getenv('RASA_TRAIN_MODEL_PATH')
 RASA_CHAT_PATH = os.getenv('RASA_CHAT_PATH')
 RASA_TOKEN = os.getenv('RASA_TOKEN')
-dflow_domain_url = os.getenv('DFLOW_DOMAIN_URL')
-dflow_validate_path = os.getenv('DFLOW_VALIDATE_PATH')
-dflow_generate_path = os.getenv('DFLOW_GENERATE_PATH')
-
 RASA_DIALOGUE_URL = f"{RASA_DOMAIN_URL}{RASA_CHAT_PATH}"
 
 bot_dialogue = commands.Bot(command_prefix="!", intents=intents)
@@ -73,4 +69,4 @@ async def on_message(message):
 
 if __name__ == "__main__":
     # resp = call_rasa_dialogue('Hello', 'klpanagi2483')
-    bot_dialogue.run(TOKEN)
+    bot_dialogue.run(BOT_TOKEN)
