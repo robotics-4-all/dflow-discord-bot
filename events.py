@@ -45,12 +45,12 @@ async def on_message(message):
         await message.channel.send('Please say something...')
         return
 
-    data = '{"sender": "' + username + '", "message": "' +  str(message.content) + '"}'
     username = str(message.author).replace("#",'').replace(".",'').replace(" ",'')
+    data = '{"sender": "' + username + '", "message": "' +  str(message.content) + '"}'
     data = data.encode('utf-8')
     url = f"{rasa_domain_url}{rasa_chat_path}"
     try:
-        response = requests.post(url, data = data)
+        response = requests.post(url, data = data, verify=False)
         if response.ok:
             data = response.json()
             for item in data:
@@ -62,9 +62,9 @@ async def on_message(message):
                 await message.channel.send(msg)
         else:
             raise Exception
-    except:
+    except Exception as e:
         msg = "There was a problem connecting with Rasa server."
-        print(msg)
+        print(f'{msg}: {str(e)}')
         await message.channel.send(msg)
     return
 
