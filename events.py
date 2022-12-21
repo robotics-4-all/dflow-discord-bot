@@ -37,7 +37,7 @@ async def on_message(message):
 
     if message.content.startswith('!'):
         return
-    
+
     if message.content.startswith('hi'):
         await message.channel.send('Hello!')
 
@@ -46,7 +46,7 @@ async def on_message(message):
         return
 
     data = '{"sender": "' + username + '", "message": "' +  str(message.content) + '"}'
-    username = str(message.author).replace("#",'')
+    username = str(message.author).replace("#",'').replace(".",'').replace(" ",'')
     data = data.encode('utf-8')
     url = f"{rasa_domain_url}{rasa_chat_path}"
     try:

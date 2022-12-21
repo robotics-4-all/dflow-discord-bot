@@ -41,7 +41,7 @@ async def ping(ctx):
 async def validate(ctx, *, arg):
     await ctx.send('Validating model...')
     url = f"{dflow_domain_url}{dflow_login_path}"
-    username = str(ctx.message.author).replace("#",'')
+    username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
     data = {
         'username': username,
         'password': '123123'
