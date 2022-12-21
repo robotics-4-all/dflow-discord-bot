@@ -54,17 +54,22 @@ async def validate(ctx, *, arg):
     except:
         raise Exception('Login to dflow-api failed')
 
-    data = arg.encode('utf-8')
+    data = arg.encode('ascii')
     data = base64.b64encode(data)
+    data = data.decode('ascii')
     payload = f'fenc={data}'
     url = f"{dflow_domain_url}{dflow_validate_path}"
     try:
         response = requests.post(url, headers = headers, params = payload)
         print(f"--> Validaton response: {response}")
-        if response.status_code != 201:
-            raise Exception
         print(f"--> Validaton response JSON: {response.json()}")
-
+        if response.status_code not in [200, 201, 202, 204]:
+            raise Exception
+        status = response.json()['status']
+        if status == 200:
+            await ctx.send('Model validated correctly!')
+        else:
+            await ctx.send(f"Validation failed! Reason: {response.json()['message']}")
     except:
         raise Exception('Validation problem with the API')
 
