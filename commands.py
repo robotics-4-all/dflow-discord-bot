@@ -171,10 +171,10 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
 
         response = requests.post(url, headers=headers, data=payload, verify=False)
         print(f"Training new model response: {response}")
-        print(f"Training new model response: {response.text}")
         filename = response.headers['filename']
         print(f'Model {filename} trained successfully!')
     except:
+        print(f"Training new model response: {response.text}")
         raise Exception('Problem with Rasa training')
 
     model_file_path = f'/app/models/{filename}'
