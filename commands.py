@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import typing
 import requests
 import base64
+import yaml
+import tarfile
 
 load_dotenv()
 intents = discord.Intents.all()
@@ -25,6 +27,7 @@ dflow_generate_path = os.getenv('DFLOW_GENERATE_PATH')
 dflow_push_model_path = os.getenv('DFLOW_PUSH_MODEL_PATH')
 dflow_merge_n_train_path = os.getenv('DFLOW_MERGE_N_TRAIN_PATH')
 rasa_chat_path = os.getenv('RASA_CHAT_PATH')
+rasa_put_model_path = os.getenv('RASA_PUT_MODEL_PATH')
 
 
 bot_commands = commands.Bot(command_prefix="!", intents=intents)
@@ -122,7 +125,7 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
     except:
         raise Exception('Login to dflow-api failed')
 
-    # Generate
+    # Generate and store tarball
     url = f"{dflow_domain_url}{dflow_generate_path}"
     model = model.encode('ascii')
     model = base64.b64encode(model)
@@ -140,6 +143,52 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
 
     except:
         raise Exception('Generation problem with the API')
+
+    # Read tarball and send data for Rasa training
+    tar = tarfile.open(TMP_FILE)
+
+    payload = {}
+
+    for member in tar.getmembers():
+        f = tar.extractfile(member)
+        try:
+            content = f.read()
+            content = content.decode()
+            name = member.name.split('/')[-1]
+            if name in ['nlu.yml', 'stories.yml', 'rules.yml', 'config.yml', 'domain.yml', 'endpoints.yml']:
+                data = yaml.safe_load(content)
+                payload.update(data)
+
+        except:
+            continue
+
+    payload = yaml.dump(payload)
+    headers = {
+      'Content-Type': 'application/yaml'
+    }
+    try:
+        url = f"{rasa_domain_url}{rasa_train_model_path}?token={rasa_token}"
+
+        response = requests.post(url, headers=headers, data=payload, verify=False)
+        print(f"Training new model response: {response}")
+        print(f"Training new model response: {response.text}")
+        filename = response.headers['filename']
+        print(f'Model {filename} trained successfully!')
+    except:
+        raise Exception('Problem with Rasa training')
+
+    model_file_path = f'/app/models/{filename}'
+    headers = {'Content-Type': 'application/json'}
+    body_params = {'model_file': model_file_path}
+    query_params = {'token': 'rasaToken'}
+
+    url = f"{rasa_domain_url}{rasa_put_model_path}"
+    try:
+        response = requests.put(url, headers=headers,
+                                    json=body_params, params=query_params, verify=False)
+        print(f"Activate new model response: {response}")
+    except:
+        raise Exception('Problem when activating newly trained Rasa model.')
 
 
 @generate.error
