@@ -39,18 +39,25 @@ async def ping(ctx):
     await ctx.send('Pong!')
 
 @bot_commands.command("validate")
-async def validate(ctx, *, arg):
+async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.Optional[str]):
     await ctx.send('Validating model...')
+    if text != None:
+        model = text
+    elif arg != None:
+        model = await arg.read()
+        model = model.decode()
+    else:
+        raise Exception('Please provide a correct model...')
 
     # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_login_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
-    data = {
+    payload = {
         'username': username,
         'password': '123123'
     }
     try:
-        response = requests.post(url, data = data)
+        response = requests.post(url, data = payload)
         print(f"--> Login response: {response}")
         if response.status_code == 401:
             raise Exception
@@ -59,10 +66,10 @@ async def validate(ctx, *, arg):
     except:
         raise Exception('Login to dflow-api failed')
 
-    data = arg.encode('ascii')
-    data = base64.b64encode(data)
-    data = data.decode('ascii')
-    payload = f'fenc={data}'
+    model = model.encode('ascii')
+    model = base64.b64encode(model)
+    model = model.decode('ascii')
+    payload = f'fenc={model}'
     url = f"{dflow_domain_url}{dflow_validate_path}"
     try:
         response = requests.post(url, headers = headers, params = payload)
@@ -90,11 +97,11 @@ async def validate_error(ctx, error):
 @bot_commands.command("generate")
 async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.Optional[str]): #: typing.Union[discord.Attachment, str]
     await ctx.send('Generating model...')
-    if isinstance(arg, str):
-        data = arg
-    elif isinstance(arg, discord.message.Attachment):
-        data = await arg.read()
-        data = data.decode()
+    if text != None:
+        model = text
+    elif arg != None:
+        model = await arg.read()
+        model = model.decode()
     else:
         raise Exception('Please provide a correct model...')
 
@@ -117,10 +124,10 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
 
     # Generate
     url = f"{dflow_domain_url}{dflow_generate_path}"
-    data = data.encode('ascii')
-    data = base64.b64encode(data)
-    data = data.decode('ascii')
-    payload = f'fenc={data}'
+    model = model.encode('ascii')
+    model = base64.b64encode(model)
+    model = model.decode('ascii')
+    payload = f'fenc={model}'
     try:
         response = requests.post(url, headers = headers, params = payload)
         print(f"--> Generation response: {response}")
