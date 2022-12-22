@@ -12,6 +12,7 @@ import base64
 load_dotenv()
 intents = discord.Intents.all()
 intents.message_content = True
+TMP_FILE = '/tmp/tmp_file.tar.gz'
 
 token = os.getenv('DFLOW_BOT_TOKEN')
 rasa_domain_url = os.getenv('RASA_DOMAIN_URL')
@@ -40,6 +41,8 @@ async def ping(ctx):
 @bot_commands.command("validate")
 async def validate(ctx, *, arg):
     await ctx.send('Validating model...')
+
+    # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_login_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
     data = {
@@ -85,8 +88,52 @@ async def validate_error(ctx, error):
         await ctx.send(error)
 
 @bot_commands.command("generate")
-async def generate(ctx, *, arg):
+async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.Optional[str]): #: typing.Union[discord.Attachment, str]
     await ctx.send('Generating model...')
+    if isinstance(arg, str):
+        data = arg
+    elif isinstance(arg, discord.message.Attachment):
+        data = await arg.read()
+        data = data.decode()
+    else:
+        raise Exception('Please provide a correct model...')
+
+    # Connect to dflow api
+    url = f"{dflow_domain_url}{dflow_login_path}"
+    username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    payload = {
+        'username': username,
+        'password': '123123'
+    }
+    try:
+        response = requests.post(url, data = payload)
+        print(f"--> Login response: {response}")
+        if response.status_code == 401:
+            raise Exception
+        token = response.json()['access_token']
+        headers = {'Authorization' : f'Bearer {token}'}
+    except:
+        raise Exception('Login to dflow-api failed')
+
+    # Generate
+    url = f"{dflow_domain_url}{dflow_generate_path}"
+    data = data.encode('ascii')
+    data = base64.b64encode(data)
+    data = data.decode('ascii')
+    payload = f'fenc={data}'
+    try:
+        response = requests.post(url, headers = headers, params = payload)
+        print(f"--> Generation response: {response}")
+        if response.status_code not in [200, 201, 202, 204]:
+            await ctx.send(f"Generation failed! Reason: {response.json()['message']}")
+            raise Exception
+        with open(TMP_FILE, 'wb') as f:
+            f.write(response.content)
+        await ctx.send('Model generated correctly!')
+
+    except:
+        raise Exception('Generation problem with the API')
+
 
 @generate.error
 async def generate_error(ctx, error):
