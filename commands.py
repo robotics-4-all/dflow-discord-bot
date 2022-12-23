@@ -10,11 +10,13 @@ import requests
 import base64
 import yaml
 import tarfile
+from gha_update import update_repo
 
 load_dotenv()
 intents = discord.Intents.all()
 intents.message_content = True
 TMP_FILE = '/tmp/tmp_file.tar.gz'
+TMP_ACTION_FILE = '/tmp/actions.py'
 
 token = os.getenv('DFLOW_BOT_TOKEN')
 rasa_domain_url = os.getenv('RASA_DOMAIN_URL')
@@ -159,6 +161,11 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
                 data = yaml.safe_load(content)
                 payload.update(data)
 
+            if name in ['actions.py']:
+                action_file = open(TMP_ACTION_FILE, 'wt')
+                action_file.write(content)
+                action_file.close()
+
         except:
             continue
 
@@ -177,6 +184,7 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
         print(f"Training new model response: {response.text}")
         raise Exception('Problem with Rasa training')
 
+    # Activate new model in Rasa instance
     model_file_path = f'/app/models/{filename}'
     headers = {'Content-Type': 'application/json'}
     body_params = {'model_file': model_file_path}
@@ -189,6 +197,9 @@ async def generate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
         print(f"Activate new model response: {response}")
     except:
         raise Exception('Problem when activating newly trained Rasa model.')
+
+    # Update Rasa action server
+    update_repo(TMP_ACTION_FILE)
 
 
 @generate.error
