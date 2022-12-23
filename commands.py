@@ -202,6 +202,7 @@ async def generate(ctx,
 
     url = f"{rasa_domain_url}{rasa_put_model_path}"
     try:
+        await ctx.send('Activating new Rasa model...')
         response = requests.put(url,
                                 headers=headers,
                                 json=body_params,
@@ -209,6 +210,7 @@ async def generate(ctx,
                                 verify=False
                                 )
         print(f"Activate new model response: {response}")
+        await ctx.send('Activated new Rasa model!')
     except:
         raise Exception('Problem when activating newly trained Rasa model.')
 
