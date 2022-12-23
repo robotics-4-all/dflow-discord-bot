@@ -26,6 +26,7 @@ def update_repo(actions_file_path: str):
     stdoutput, stderroutput = process.communicate()
     shutil.copyfile(actions_file_path, path.join(RASA_ACTIONS_REPO_PATH,
                                                  'actions', 'actions.py'))
+
     command_b = 'git add -A .'
     print(f'Executing command: <{command_b}>')
     process = subprocess.Popen(
@@ -35,6 +36,8 @@ def update_repo(actions_file_path: str):
         cwd=RASA_ACTIONS_REPO_PATH,
         shell=True
     )
+    stdoutput, stderroutput = process.communicate()
+
     command_c = 'git commit -m "Updates rasa actions"'
     print(f'Executing command: <{command_c}>')
     process = subprocess.Popen(
