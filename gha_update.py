@@ -14,7 +14,7 @@ PIPE = subprocess.PIPE
 
 
 def update_repo(actions_file_path: str):
-    command_a = f'git pull {BRANCH}'
+    command_a = f'git pull'
     print(f'Executing command: <{command_a}>')
     process = subprocess.Popen(
         command_a,
