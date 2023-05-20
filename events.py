@@ -19,6 +19,8 @@ RASA_CHAT_PATH = os.getenv('RASA_CHAT_PATH')
 RASA_TOKEN = os.getenv('RASA_TOKEN')
 RASA_DIALOGUE_URL = f"{RASA_DOMAIN_URL}{RASA_CHAT_PATH}"
 
+command_char = '!'
+
 bot_dialogue = commands.Bot(command_prefix="!", intents=intents)
 
 
@@ -36,6 +38,8 @@ async def on_ready():
 
 @bot_dialogue.event
 async def on_message(message):
+    if command_char in message.content:
+        return
     print(f"Rasa request: {message.content}")
     if message.author == bot_dialogue.user:
         return
