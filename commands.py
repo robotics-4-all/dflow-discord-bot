@@ -25,6 +25,7 @@ rasa_train_model_path = os.getenv('RASA_TRAIN_MODEL_PATH')
 rasa_token = os.getenv('RASA_TOKEN')
 dflow_domain_url = os.getenv('DFLOW_DOMAIN_URL')
 dflow_login_path = os.getenv('DFLOW_LOGIN_PATH')
+dflow_register_path = os.getenv('DFLOW_REGISTER_PATH')
 dflow_validate_path = os.getenv('DFLOW_VALIDATE_PATH')
 dflow_generate_path = os.getenv('DFLOW_GENERATE_PATH')
 dflow_push_model_path = os.getenv('DFLOW_PUSH_MODEL_PATH')
@@ -43,6 +44,27 @@ async def on_ready():
 @bot_commands.command("ping")
 async def ping(ctx):
     await ctx.send('Pong!')
+
+@bot_commands.command("register")
+async def register(ctx, *, arg):
+    # Connect to dflow api
+    url = f"{dflow_domain_url}{dflow_register_path}"
+    username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    payload = {
+        'new_user': {
+            'username': username,
+            'password': '123123',
+            'email': arg
+        }
+    }
+    try:
+        response = requests.post(url, data = payload)
+        print(f"--> Register response: {response}")
+        if response.status_code == 401:
+            raise Exception
+    except:
+        raise Exception('Login to dflow-api failed')
+
 
 @bot_commands.command("validate")
 async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.Optional[str]):
