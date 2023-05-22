@@ -60,11 +60,20 @@ async def register(ctx, *, arg):
     try:
         response = requests.post(url, data = payload)
         print(f"--> Register response: {response}")
-        if response.status_code == 401:
+        if response.status_code == 422:
             raise Exception
+        elif response.status_code in [200, 201]:
+            ctx.send('Registered successfully!')
     except:
-        raise Exception('Login to dflow-api failed')
+        raise Exception('Register to dflow-api failed')
 
+@validate.error
+async def register_error(ctx, error):
+    print('Error:', error)
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please provide an email...')
+    else:
+        await ctx.send(error)
 
 @bot_commands.command("validate")
 async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.Optional[str]):
