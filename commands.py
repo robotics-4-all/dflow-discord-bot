@@ -67,7 +67,7 @@ async def register(ctx, *, arg):
     except:
         raise Exception('Register to dflow-api failed')
 
-@validate.error
+@register.error
 async def register_error(ctx, error):
     print('Error:', error)
     if isinstance(error, commands.MissingRequiredArgument):
