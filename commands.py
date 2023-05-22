@@ -10,6 +10,7 @@ import typing
 import requests
 import base64
 import yaml
+import json
 import tarfile
 from gha_update import update_repo
 
@@ -50,20 +51,27 @@ async def register(ctx, *, arg):
     # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_register_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
-    payload = {
+    payload = json.dumps({
         'new_user': {
             'username': username,
             'password': '123123',
             'email': arg
         }
+    })
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
     }
     try:
-        response = requests.post(url, data = payload)
+        response = requests.post(url, data = payload, headers = headers)
         print(f"--> Register response: {response}")
-        if response.status_code == 422:
+        if response.status_code in [200, 201, 202, 204]:
+            await ctx.send('Registered successfully!')
+        elif response.status_code in [400]:
+            await ctx.send('User already registered!')
+        else:
+            print(f'reason {response.reason}')
             raise Exception
-        elif response.status_code in [200, 201]:
-            ctx.send('Registered successfully!')
     except:
         raise Exception('Register to dflow-api failed')
 
