@@ -13,6 +13,7 @@ import yaml
 import json
 import tarfile
 from gha_update import update_repo
+import re
 
 load_dotenv()
 intents = discord.Intents.all()
@@ -51,6 +52,7 @@ async def register(ctx, *, arg):
     # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_register_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    username = re.sub(r"[^a-zA-Z0-9_-]+", "", username)
     payload = json.dumps({
         'new_user': {
             'username': username,
@@ -97,6 +99,7 @@ async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
     # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_login_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    username = re.sub(r"[^a-zA-Z0-9_-]+", "", username)
     payload = {
         'username': username,
         'password': '123123'
@@ -155,6 +158,7 @@ async def generate(ctx,
     # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_login_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    username = re.sub(r"[^a-zA-Z0-9_-]+", "", username)
     payload = {
         'username': username,
         'password': '123123'
@@ -282,6 +286,7 @@ async def push(ctx, arg: typing.Optional[discord.Attachment], text: typing.Optio
     # Connect to dflow api
     url = f"{dflow_domain_url}{dflow_login_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    username = re.sub(r"[^a-zA-Z0-9_-]+", "", username)
     payload = {
         'username': username,
         'password': '123123'
@@ -338,6 +343,7 @@ async def merge(ctx):
     await ctx.send('Merging user models into a single model...')
     url = f"{dflow_domain_url}{dflow_login_path}"
     username = str(ctx.message.author).replace("#",'').replace(".",'').replace(" ",'')
+    username = re.sub(r"[^a-zA-Z0-9_-]+", "", username)
     headers = {}
     payload = {
         'username': username,
