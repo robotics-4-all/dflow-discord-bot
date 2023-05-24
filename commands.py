@@ -46,9 +46,11 @@ bot_commands = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print('We have logged in as {0.user}'.format(bot_commands))
 
+
 @bot_commands.command("ping")
 async def ping(ctx):
     await ctx.send('Pong!')
+
 
 @bot_commands.command("register")
 async def register(ctx, *, arg):
@@ -71,9 +73,9 @@ async def register(ctx, *, arg):
         response = requests.post(url, data = payload, headers = headers)
         print(f"--> Register response: {response}")
         if response.status_code in [200, 201, 202, 204]:
-            await ctx.send('Registered successfully!')
+            await ctx.send(f'User [{username}] registration completed! :robot:')
         elif response.status_code in [400]:
-            await ctx.send('User already registered!')
+            await ctx.send(f'User [{username}] already registered!')
         else:
             print(f'reason {response.reason}')
             raise Exception
@@ -115,7 +117,7 @@ async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
         token = response.json()['access_token']
         headers = {'Authorization' : f'Bearer {token}'}
     except:
-        raise Exception('Login to dflow-api failed')
+        raise Exception('Login to dflow-api failed :skull:')
 
     model = model.encode('ascii')
     model = base64.b64encode(model)
@@ -130,9 +132,9 @@ async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
             raise Exception
         status = response.json()['status']
         if status == 200:
-            await ctx.send('Model validated correctly!')
+            await ctx.send('Model validation succeeded :+1:')
         else:
-            await ctx.send(f"Validation failed! Reason: {response.json()['message']}")
+            await ctx.send(f"Validation failed! Reason: {response.json()['message']} :skull:")
     except:
         raise Exception('Validation problem with the API')
 
@@ -141,7 +143,7 @@ async def validate(ctx, arg: typing.Optional[discord.Attachment], text: typing.O
 async def validate_error(ctx, error):
     print('Error:', error)
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Please provide a model...')
+        await ctx.send('Please provide a model... ')
     else:
         await ctx.send(error)
 
@@ -149,7 +151,7 @@ async def validate_error(ctx, error):
 async def generate(ctx,
                    arg: typing.Optional[discord.Attachment],
                    text: typing.Optional[str]):
-    await ctx.send('Generating model...')
+    # await ctx.send('Generating Rasa model...')
     if text != None:
         model = text
     elif arg != None:
@@ -174,7 +176,7 @@ async def generate(ctx,
         token = response.json()['access_token']
         headers = {'Authorization' : f'Bearer {token}'}
     except:
-        raise Exception('Login to dflow-api failed')
+        raise Exception('Login with dflow-api failed')
 
     # Generate and store tarball
     url = f"{dflow_domain_url}{dflow_generate_path}"
@@ -189,13 +191,13 @@ async def generate(ctx,
                                  )
         print(f"--> Generation response: {response}")
         if response.status_code not in [200, 201, 202, 204]:
-            await ctx.send(f"Generation failed! Reason: {response.json()['message']}")
+            await ctx.send(f"Model Generation failed! Reason: {response.json()['message']} :skull:")
             raise Exception
         u_id = uuid.uuid4().hex[0:8]
         fpath = os.path.join(TMP_DIR, f'model-{u_id}.tar.gz')
         with open(fpath, 'wb') as f:
             f.write(response.content)
-        await ctx.send('Model generated correctly!')
+        await ctx.send('dFlow to Rasa model transformation completed. :+1:')
     except:
         raise Exception('Generation problem with the API')
 
@@ -235,7 +237,7 @@ async def generate(ctx,
         print(f"Training new model response: {response}")
         filename = response.headers['filename']
         print(f'Model {filename} trained successfully!')
-        await ctx.send('Model trained correctly!')
+        await ctx.send('Rasa training completed! :+1:')
     except:
         print(f"Training new model response: {response.text}")
         raise Exception('Problem with Rasa training')
@@ -248,7 +250,7 @@ async def generate(ctx,
 
     url = f"{rasa_domain_url}{rasa_put_model_path}"
     try:
-        await ctx.send('Activating new Rasa model...')
+        # await ctx.send('Activating new Rasa model...')
         response = requests.put(url,
                                 headers=headers,
                                 json=body_params,
@@ -256,14 +258,15 @@ async def generate(ctx,
                                 verify=False
                                 )
         print(f"Activate new model response: {response}")
-        await ctx.send('Activated new Rasa model!')
+        await ctx.send('Activated new Rasa model! :+1:')
     except:
         raise Exception('Problem when activating newly trained Rasa model.')
 
     # Update Rasa action server
-    await ctx.send('Deploying new actions...')
     update_repo(TMP_ACTION_FILE)
-    await ctx.send('Deployed new actions!')
+    await ctx.send('Generated new actions! :+1:')
+    await ctx.send('The Continues Delivery (CD) process will now synchronize new actions within the cluster.')
+    await ctx.send('This process usually takes ~2 minutes to finish')
 
 
 @generate.error
