@@ -25,11 +25,15 @@ bot_dialogue = commands.Bot(command_prefix="!", intents=intents)
 
 
 def call_rasa_dialogue(msg: str, username: str):
-    data = '{"sender": "' + username + '", "message": "' +  str(msg) + '"}'
-    data = data.encode('utf-8')
-    response = requests.post(RASA_DIALOGUE_URL, data=data, verify=False)
-    print(f'Rasa response: {response.json()}')
-    return response
+    try:
+        data = '{"sender": "' + username + '", "message": "' +  str(msg) + '"}'
+        data = data.encode('utf-8')
+        response = requests.post(RASA_DIALOGUE_URL, data=data, verify=False)
+        print(f'Rasa response: {response.json()}')
+        return response
+    except Exception as e:
+        print(f'[X] Failed to call RASA Dialogue - {e}')
+        return {}
 
 
 @bot_dialogue.event
