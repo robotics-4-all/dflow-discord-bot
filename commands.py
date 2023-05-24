@@ -21,6 +21,9 @@ intents.message_content = True
 TMP_DIR = '/tmp/rasa-discord'
 TMP_ACTION_FILE = '/tmp/actions.py'
 
+if not os.path.exists(TMP_DIR):
+    os.mkdir(TMP_DIR)
+
 token = os.getenv('DFLOW_BOT_TOKEN')
 rasa_domain_url = os.getenv('RASA_DOMAIN_URL')
 rasa_train_model_path = os.getenv('RASA_TRAIN_MODEL_PATH')
@@ -374,8 +377,8 @@ async def merge(ctx):
             await ctx.send(file=discord.File(fpath))
         else:
             await ctx.send(f"Merge models failed! Reason: {response.reason}")
-    except:
-        raise Exception('Merge Models problem with the dFlow API')
+    except Exception as e:
+        raise Exception(f'Merge Models problem with the dFlow API: {e}')
 
 
 @merge.error
