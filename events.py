@@ -55,7 +55,7 @@ async def on_message(message):
         await message.channel.send('Please say something...')
         return
 
-    username = str(message.author).replace("#",'').replace(".",'').replace(" ",'')
+    username = str(message.author).split("#")[0].replace(".",'').replace(" ",'')
     response = call_rasa_dialogue(message.content, username)
     try:
         if response.ok:
