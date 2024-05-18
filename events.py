@@ -19,9 +19,13 @@ RASA_CHAT_PATH = os.getenv('RASA_CHAT_PATH')
 RASA_TOKEN = os.getenv('RASA_TOKEN')
 RASA_DIALOGUE_URL = f"{RASA_DOMAIN_URL}{RASA_CHAT_PATH}"
 
+
+CHANNEL_IDS_TO_LISTEN = ["1239936124340932748"]
+
 command_char = '!'
 
 bot_dialogue = commands.Bot(command_prefix="!", intents=intents)
+
 
 
 def call_rasa_dialogue(msg: str, username: str):
@@ -40,8 +44,11 @@ def call_rasa_dialogue(msg: str, username: str):
 async def on_ready():
     print('Logged in as {0.user}'.format(bot_dialogue))
 
+
 @bot_dialogue.event
 async def on_message(message):
+    if message.channel.id not in CHANNEL_IDS_TO_LISTEN:
+        return
     if command_char in message.content:
         return
     print(f"Rasa request: {message.content}")
@@ -74,6 +81,7 @@ async def on_message(message):
         print(f'{msg}: {str(e)}')
         await message.channel.send(msg)
     return
+
 
 if __name__ == "__main__":
     # resp = call_rasa_dialogue('Hello', 'klpanagi2483')
