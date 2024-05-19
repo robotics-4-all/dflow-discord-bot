@@ -31,7 +31,8 @@ NOTIFICATIONS_MQTT_PASSWORD = os.getenv("NOTIFICATIONS_MQTT_PASSWORD", "")
 NOTIFICATIONS_MQTT_SSL = os.getenv("NOTIFICATIONS_MQTT_SSL", False)
 NOTIFICATIONS_MQTT_TOPIC = os.getenv("NOTIFICATIONS_MQTT_TOPIC", "rasacloud.deployments.events")
 
-DISCORD_CHANNEL = os.getenv("DISCORD_CHANNEL", 1239936124340932748)
+DISCORD_CHANNEL = int(os.getenv("DISCORD_CHANNEL", 1239936124340932748))
+# DISCORD_CHANNEL = 1239936124340932748
 
 command_char = '!'
 
@@ -73,12 +74,18 @@ class DeployEvents:
         # asyncio.get_event_loop().create_task(channel.send(msg))
         asyncio.run_coroutine_threadsafe(channel.send(msg), discord_client.loop)
 
-    @discord_client.event
-    async def discord_on_ready():
-        print('Logged in as {0.user}'.format(discord_client))
+
+@discord_client.event
+async def on_ready():
+    print(f'Logged in as {discord_client.user}')
+    text_channel_list = []
+    print(f"Connected to channels:")
+    for guild in discord_client.guilds:
+        for channel in guild.text_channels:
+            text_channel_list.append(channel)
+            print("- ", channel.id, channel, guild.name)
 
 
 if __name__ == "__main__":
-    # resp = call_rasa_dialogue('Hello', 'klpanagi2483')
     listener = DeployEvents()
     discord_client.run(BOT_TOKEN)
